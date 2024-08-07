@@ -3,6 +3,7 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+import Snackbar from '@mui/material/Snackbar';
 import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark';
 import Inventory2TwoToneIcon from '@mui/icons-material/Inventory2TwoTone';
 import AddIcon from '@mui/icons-material/Add';
@@ -19,7 +20,7 @@ const style = {
   left: '50%',
   transform: 'translate(-50%, -50%)',
   width: 400,
-  bgcolor: '0d1b2a',
+  bgcolor: '#0d1b2a',
   border: '2px solid #000',
   boxShadow: 24,
   p: 4,
@@ -32,6 +33,19 @@ export default function Home() {
   const [inventory, setInventory] = useState([])
   const [open, setOpen] = useState(false)
   const [itemName, setItemName] = useState('')
+  const [openSnack,setOpenSnack] = useState(false)
+
+  const handleSnackOpen = () => {
+    setOpenSnack(true);
+  };
+
+  const handleSnackClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpenSnack(false);
+  };
 
   const updateInventory = async () => {
     const snapshot = query(collection(firestore, 'inventory'))
@@ -85,30 +99,38 @@ export default function Home() {
       flexDirection={'column'}
       alignItems={'center'}
       gap={2}
-      bgcolor="0d1b2a"
+      bgcolor="#0d1b2a"
     >
+      <Snackbar
+            open={openSnack}
+            autoHideDuration={2000}
+            onClose={handleSnackClose}
+            message="Please Name Your Item."
+          /> 
       <Modal
         open={open}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
+        <Box sx={style} bgcolor="#0d1b2a" borderRadius={3}>
+          <Typography id="modal-modal-title" variant="h6" component="h2" color={'#e0e1dd'}>
             Add Item
           </Typography>
-          <Stack width="100%" direction={'row'} spacing={2}>
+          <Stack width="100%" direction={'column'} spacing={2} sx={{color:'#e0e1dd'}}>
             <TextField
               id="outlined-basic"
               label="Name"
               variant="outlined"
               fullWidth
+              required
               value={itemName}
               onChange={(e) => setItemName(e.target.value)}
             />
             <TextField
               id="outlined-number"
               label="Quantity"
+              fullWidth
               type="number"
               defaultValue="1"
               InputLabelProps={{
@@ -118,9 +140,14 @@ export default function Home() {
             <Button
               variant="outlined"
               onClick={() => {
-                addItem(itemName)
-                setItemName('')
-                handleClose()
+                if (itemName === "") {
+                  handleSnackOpen()
+                } else {
+                  addItem(itemName)
+                  setItemName('')
+                  handleClose()
+                }
+                
               }}
             >
               Add
