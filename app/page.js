@@ -6,27 +6,29 @@ import '@fontsource/roboto/700.css';
 import Snackbar from '@mui/material/Snackbar';
 import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark';
 import Inventory2TwoToneIcon from '@mui/icons-material/Inventory2TwoTone';
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import AddIcon from '@mui/icons-material/Add';
 import Image from "next/image";
 import ClearIcon from '@mui/icons-material/Clear';
 import { useState, useEffect } from "react";
 import { firestore } from "@/firebase";
-import { Box, Button, IconButton, Modal, Stack, TextField, Tooltip, Typography } from "@mui/material";
+import { Alert, Box, Button, Fab, IconButton, Modal, Stack, TextField, Tooltip, Typography } from "@mui/material";
 import { collection, deleteDoc, doc, getDoc, query, setDoc, getDocs } from "firebase/firestore";
-import { Add, BorderAllRounded, Margin } from '@mui/icons-material';
+import { Add, BorderAllRounded, Margin, Mms, SearchRounded } from '@mui/icons-material';
 const style = {
   position: 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
   width: 400,
-  bgcolor: '#0d1b2a',
-  border: '2px solid #000',
+  bgcolor: '#000',
+  border: '2px solid #e0e1dd',
   boxShadow: 24,
   p: 4,
   display: 'flex',
   flexDirection: 'column',
   gap: 3,
+  color: "#e0e1dd"
 }
 
 export default function Home() {
@@ -34,6 +36,18 @@ export default function Home() {
   const [open, setOpen] = useState(false)
   const [itemName, setItemName] = useState('')
   const [openSnack,setOpenSnack] = useState(false)
+  const [itemQuan,setItemQuan] = useState(1)
+  const [msg, setMsg] = useState("")
+  const [msgType, setMsgType] = useState(0)
+
+  const handlemsg = () => {
+    if (msgType === 0) {
+      setMsg("Please Name Your Item")
+      
+    } else if (msgType === 1) {
+      setMsg("Please Enter Value Above 0")
+    }
+  }
 
   const handleSnackOpen = () => {
     setOpenSnack(true);
@@ -64,7 +78,7 @@ export default function Home() {
       const { quantity } = docSnap.data()
       await setDoc(docRef, { quantity: quantity + 1 })
     } else {
-      await setDoc(docRef, { quantity: 1 })
+      await setDoc(docRef, { quantity: itemQuan })
     }
     await updateInventory()
   }
@@ -101,12 +115,16 @@ export default function Home() {
       gap={2}
       bgcolor="#0d1b2a"
     >
-      <Snackbar
-            open={openSnack}
-            autoHideDuration={2000}
-            onClose={handleSnackClose}
-            message="Please Name Your Item."
-          /> 
+      <Snackbar open={openSnack} autoHideDuration={3000} onClose={handleSnackClose}>
+        <Alert
+          onClose={handleSnackClose}
+          severity="error"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {msg}
+        </Alert>
+      </Snackbar>
       <Modal
         open={open}
         onClose={handleClose}
@@ -123,6 +141,20 @@ export default function Home() {
               label="Name"
               variant="outlined"
               fullWidth
+              sx={{
+                '& .MuiInputLabel-root': {
+                color: '#e0e1dd', // Change the label color here
+                },
+                input: { color: '#e0e1dd' }, // Changes the text color
+                '& .MuiOutlinedInput-root': { // Targets the outline
+                  '& fieldset': {
+                    borderColor: '#e0e1dd', // Changes the border color
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#023e8a', // Changes the border color on hover
+                  },
+                },
+              }}
               required
               value={itemName}
               onChange={(e) => setItemName(e.target.value)}
@@ -131,16 +163,39 @@ export default function Home() {
               id="outlined-number"
               label="Quantity"
               fullWidth
+              required
               type="number"
+              sx={{
+                '& .MuiInputLabel-root': {
+                color: '#e0e1dd', // Change the label color here
+                },
+                input: { color: '#e0e1dd' }, // Changes the text color
+                '& .MuiOutlinedInput-root': { // Targets the outline
+                  '& fieldset': {
+                    borderColor: '#e0e1dd', // Changes the border color
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#023e8a', // Changes the border color on hover
+                  },
+                },
+              }}
               defaultValue="1"
               InputLabelProps={{
                 shrink: true,
               }}
+              value={itemQuan}
+              onChange={(e) => setItemQuan(e.target.value)}
             />
             <Button
               variant="outlined"
               onClick={() => {
                 if (itemName === "") {
+                  setMsgType(0)
+                  handlemsg()
+                  handleSnackOpen()
+                } else if (itemQuan < 1) {
+                  setMsgType(1)
+                  handlemsg()
                   handleSnackOpen()
                 } else {
                   addItem(itemName)
@@ -171,12 +226,17 @@ export default function Home() {
           <Typography variant={'h4'} color={'#e0e1dd'} textAlign={'center'} fontFamily="monospace" fontStyle="oblique" fontWeight="1000">
             INVEN
           </Typography>
-          <Tooltip title="Add Item">
-            <IconButton aria-label='Add Item' onClick={handleOpen} size='large' sx={{color:"#e0e1dd"}}>
-            <AddIcon fontSize='inherit'/>
+          <Tooltip title="Search Item">
+            <IconButton aria-label='Add Item' size='large' sx={{color:"#e0e1dd"}}>
+            <SearchRoundedIcon fontSize='inherit'/>
             </IconButton>
           </Tooltip>
         </Box>
+        <Fab variant="extended" onClick={handleOpen} color='primary' sx={{position:"absolute", bottom:16, right:16 ,color:"#e0e1dd"}}>
+          <AddIcon sx={{ mr: 1 }} />
+          Add Item
+        </Fab>
+
         <Stack fullWidth height="90vh" spacing={2} overflow={'auto'} direction={"row"} p={2} bgcolor="#0d1b2a">
           {inventory.map(({name, quantity}) => (
             <Box
@@ -205,6 +265,14 @@ export default function Home() {
                 <Tooltip title="Add"><IconButton variant="contained" onClick={() => addItem(name)} sx={{color:"#e0e1dd"}}><AddIcon/></IconButton></Tooltip>
                 <Tooltip title="Remove"><IconButton variant="contained" onClick={() => removeItem(name)} sx={{color:"#e0e1dd"}}><ClearIcon/></IconButton></Tooltip>
               </Box>
+              <Button title="Remove All"
+                onClick={() => {
+                  deleteDoc(doc(collection(firestore, 'inventory'), name))
+                  updateInventory()
+                }}
+                fullWidth
+                variant='outlined'
+                >Remove All</Button>
             </Box>
           ))}
         </Stack>
