@@ -248,7 +248,7 @@ export default function Home() {
         </Fab>
         
         <Typography textAlign="center" variant='h4' color="#376195" sx={{position:"absolute", bottom:"45%", right: "29%" }} visibility={visb} zIndex="0">
-              Click "+ ADD ITEM" Button to Add Item
+              Click &quot;+ ADD ITEM&quot; Button to Add Item
         </Typography>
 
         <Stack fullWidth height="90vh" spacing={2} overflow={'auto'} direction={"row"} p={2} bgcolor="#0d1b2a">
