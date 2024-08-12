@@ -239,7 +239,7 @@ export default function Home() {
           >
           <Inventory2TwoToneIcon sx={{mr:1}} fontSize='large'/>
           <Typography variant={'h4'} color={'#e0e1dd'} textAlign={'center'} fontFamily="monospace" fontStyle="oblique" fontWeight="1000">
-            INVEN
+            INVENMAN
           </Typography>
         </Box>
         <Fab variant="extended" onClick={handleOpen} color='primary' sx={{position:"absolute", bottom:"25px", right:"25px" ,color:"#e0e1dd"}}>
