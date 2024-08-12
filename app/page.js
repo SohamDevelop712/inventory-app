@@ -6,6 +6,7 @@ import '@fontsource/roboto/700.css';
 import Snackbar from '@mui/material/Snackbar';
 import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark';
 import Inventory2TwoToneIcon from '@mui/icons-material/Inventory2TwoTone';
+import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import AddIcon from '@mui/icons-material/Add';
 import Image from "next/image";
@@ -13,14 +14,14 @@ import ClearIcon from '@mui/icons-material/Clear';
 import { useState, useEffect } from "react";
 import { firestore } from "@/firebase";
 import { Alert, Box, Button, Fab, IconButton, Modal, Stack, TextField, Tooltip, Typography } from "@mui/material";
-import { collection, deleteDoc, doc, getDoc, query, setDoc, getDocs } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, query, setDoc, getDocs, getFirestore, onSnapshot } from "firebase/firestore";
 import { Add, BorderAllRounded, Margin, Mms, SearchRounded } from '@mui/icons-material';
+import { checkCustomRoutes } from 'next/dist/lib/load-custom-routes';
 const style = {
   position: 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 400,
   bgcolor: '#000',
   border: '2px solid #e0e1dd',
   boxShadow: 24,
@@ -39,6 +40,9 @@ export default function Home() {
   const [itemQuan,setItemQuan] = useState(1)
   const [msg, setMsg] = useState("")
   const [msgType, setMsgType] = useState(0)
+  const [visb, setVisb] = useState("")
+
+  
 
   const handlemsg = () => {
     if (msgType === 0) {
@@ -69,6 +73,11 @@ export default function Home() {
       inventoryList.push({ name: doc.id, ...doc.data() })
     })
     setInventory(inventoryList)
+    if (inventoryList.length === 0) {
+      setVisb("visible")
+    }else{
+      setVisb("hidden")
+    }
   }
 
   const addItem = async (item) => {
@@ -98,7 +107,7 @@ export default function Home() {
   }
 
   useEffect(() => {
-    updateInventory()
+    updateInventory()    
   }, [])
 
   const handleOpen = () => setOpen(true)
@@ -131,7 +140,7 @@ export default function Home() {
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={style} bgcolor="#0d1b2a" borderRadius={3}>
+        <Box sx={style} width={{xs:300, sm:400, md:400}} bgcolor="#0d1b2a" borderRadius={3}>
           <Typography id="modal-modal-title" variant="h6" component="h2" color={'#e0e1dd'}>
             Add Item
           </Typography>
@@ -200,6 +209,7 @@ export default function Home() {
                 } else {
                   addItem(itemName)
                   setItemName('')
+                  setItemQuan(1)
                   handleClose()
                 }
                 
@@ -216,32 +226,36 @@ export default function Home() {
           height="10vh"
           bgcolor={'#023e8a'}
           display={'flex'}
-          justifyContent="space-between"
+          justifyContent="center"
           alignItems={'center'}
           flexDirection="row"
           p={2}
           color="#e0e1dd"
+          sx={{
+            borderBottomLeftRadius:30,
+            borderBottomRightRadius:30,
+            boxShadow:20
+          }}
           >
-          <Inventory2TwoToneIcon fontSize='large'/>
+          <Inventory2TwoToneIcon sx={{mr:1}} fontSize='large'/>
           <Typography variant={'h4'} color={'#e0e1dd'} textAlign={'center'} fontFamily="monospace" fontStyle="oblique" fontWeight="1000">
             INVEN
           </Typography>
-          <Tooltip title="Search Item">
-            <IconButton aria-label='Add Item' size='large' sx={{color:"#e0e1dd"}}>
-            <SearchRoundedIcon fontSize='inherit'/>
-            </IconButton>
-          </Tooltip>
         </Box>
         <Fab variant="extended" onClick={handleOpen} color='primary' sx={{position:"absolute", bottom:16, right:16 ,color:"#e0e1dd"}}>
           <AddIcon sx={{ mr: 1 }} />
           Add Item
         </Fab>
+        
+        <Typography textAlign="center" variant='h4' color="#376195" sx={{position:"absolute", bottom:"45%", right: "29%" }} visibility={visb} zIndex="0">
+              Click "+ ADD ITEM" Button to Add Item
+        </Typography>
 
         <Stack fullWidth height="90vh" spacing={2} overflow={'auto'} direction={"row"} p={2} bgcolor="#0d1b2a">
           {inventory.map(({name, quantity}) => (
             <Box
               key={name}
-              width="30vw"
+              width="300px"
               height="100%"
               display={"flex"}
               justifyContent={'center'}
@@ -252,6 +266,7 @@ export default function Home() {
               flexDirection="column"
               borderRadius={2}
               boxShadow={5}
+              zIndex="2"
             >
               <Box width="100%" justifyContent="space-between" spacing={5} alignContent="center" display="flex" flexDirection="column" >
                 <Typography variant={'h2'} color={'#e0e1dd'} textAlign={'center'}>
@@ -272,7 +287,7 @@ export default function Home() {
                 }}
                 fullWidth
                 variant='outlined'
-                >Remove All</Button>
+                ><DeleteRoundedIcon sx={{mr: 1}}/>Remove All</Button>
             </Box>
           ))}
         </Stack>
