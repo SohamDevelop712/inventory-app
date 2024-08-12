@@ -242,7 +242,7 @@ export default function Home() {
             INVEN
           </Typography>
         </Box>
-        <Fab variant="extended" onClick={handleOpen} color='primary' sx={{position:"absolute", bottom:16, right:16 ,color:"#e0e1dd"}}>
+        <Fab variant="extended" onClick={handleOpen} color='primary' sx={{position:"absolute", bottom:"25px", right:"25px" ,color:"#e0e1dd"}}>
           <AddIcon sx={{ mr: 1 }} />
           Add Item
         </Fab>
