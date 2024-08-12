@@ -50,6 +50,8 @@ export default function Home() {
       
     } else if (msgType === 1) {
       setMsg("Please Enter Value Above 0")
+    }else if (msgType === 2) {
+      setMsg("Please Enter a Discrete Quantity")
     }
   }
 
@@ -204,6 +206,10 @@ export default function Home() {
                   handleSnackOpen()
                 } else if (itemQuan < 1) {
                   setMsgType(1)
+                  handlemsg()
+                  handleSnackOpen()
+                } else if (itemQuan%1 !== 0) {
+                  setMsgType(2)
                   handlemsg()
                   handleSnackOpen()
                 } else {
